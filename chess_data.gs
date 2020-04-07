@@ -145,10 +145,10 @@ function getLastScore(data, gameTypeDescription) {
 
 /* 
 
-Submits the Skill form for a particular game type and the score for that game type.
+Submits the Skill form for a particular goal and the score for that goal.
 
-@param {string} gameType - The type of chess game. Options are Daily or Blitz
-@param {integer} score - The current score of a particular gameType
+@param {string} multipleChoiceText - The text for the desired multiple choice goal
+@param {integer} score - The current score of a particular goal
 
 */
 
