@@ -1,15 +1,10 @@
 /* 
 
-x get the last score for daily chess
-x get the last score for blitz chess
-x store in an object called currentScores
-- get the last score for Puzzles
-x get recent scores from Sheets
-x store in an object called "recentScores"
-x get JSON from chess.com
-x determine if recent daily score != current daily score
-x determine if recent blitz score != current blitz score
-x if recent  score != current  score, new form submission
+I'm logging my goals for 2020. One of my goals includes getting better at chess.
+
+The chess.com API allows for read0only access of some stats. Previously, I manually added all stats via a Google Form.
+
+I decided to automate the checking, validating, and submission of Daily and Blitz games.
 
 */
 
@@ -45,10 +40,11 @@ function determineIfUpdateNeeded() {
     else {
       var operator = "the same as";
     }
+    
+    // Log a message whether the current and recent scores were the same or different
     var message = "Current " + key + " score (" + currentScores[key] +") is " + operator + " the recent " + key + " score (" + recentScores[key] + ").";
     Logger.log(message);
   });
-  
 }
 
 
@@ -156,10 +152,7 @@ Submits the Skill form for a particular game type and the score for that game ty
 
 */
 
-
-function submitForm(gameType, score) {
-  
-  var formGameType = gameTypes[gameType];
+function submitForm(multipleChoiceText, score) {
   
   // Setup access to the form and responses
   var formId = "1sat4YF0pDNooZCLpegxvUFjcCByU5FrBebE4K10zuNU";
@@ -169,7 +162,7 @@ function submitForm(gameType, score) {
   
   // Set multiple choice response
   var multItem = items[0].asMultipleChoiceItem();
-  var multResponse = multItem.createResponse(gameType);
+  var multResponse = multItem.createResponse(multipleChoiceText);
   formResponse.withItemResponse(multResponse);
 
   // Set score response
