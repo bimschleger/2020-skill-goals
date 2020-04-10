@@ -14,7 +14,7 @@ Compare recent sheet scores and current chess.com scores.
 
 */
 
-function determineIfUpdateNeeded() {
+function determineIfChessUpdateNeeded() {
   
   // Game type and the name on the multiple choice form
   var gameTypes = {
