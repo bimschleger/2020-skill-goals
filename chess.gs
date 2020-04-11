@@ -2,8 +2,10 @@
 
 I'm logging my goals for 2020. One of my goals includes getting better at chess.
 
-The chess.com API allows for read0only access of some stats. Previously, I manually added all stats via a Google Form.
+The chess.com API allows for read0only access of some stats. 
+Scraping the stats page allows me to get all of the data thtat I need.
 
+Previously, I manually added all stats via a Google Form.
 I decided to automate the checking, validating, and submission of Daily and Blitz games.
 
 */
@@ -18,13 +20,14 @@ function determineIfChessUpdateNeeded() {
   
   // Game type and the name on the multiple choice form
   var gameTypes = {
-    "lessons": "3.a) 900 puzzle rating on Chess.com.",
+    "puzzles": "3.a) 900 puzzle rating on Chess.com.",
     "blitz": "3.b) 1100 Blitz rating on Chess.com",
     "daily": "3.c) 1100 Daily rating on Chess.com."
   }
   
   // Get current and recent scores
-  var currentScores = getCurrentChessScoresFromDotCom();
+  // var currentScores = getCurrentChessScoresFromDotCom();
+  var currentScores = getChessDotComData();
   var recentScores = getRecentChessScoresFromSheet(gameTypes);
   
   // Get keys to iterate through
@@ -48,13 +51,61 @@ function determineIfChessUpdateNeeded() {
 }
 
 
+/*
+
+This function scrapes my stats page on chess.com and returns and object with my current scores go Daily, Blitz, and Puzzle game types.
+
+@return {object} currentScores - An object containing my current scores for game types on chess.com
+
+*/
+
+function getChessDotComData() {
+  
+  // Gets content from my chess.com stats page
+  const username = "bimschleger";
+  const url = "https://www.chess.com/stats/daily/chess/" + username;
+  const urlContent = UrlFetchApp.fetch(url).getContentText();
+  
+  // Matches HTML code for the Stats right sidebar
+  // There's probably a more direct way to access this via XML but this works
+  const regex = /(Blitz|Daily|Puzzles)\s+<span class="user-rating">\s+(\d+)/g;
+  var matches = urlContent.match(regex);
+  
+  // Object of all the gameTypes
+  let currentScores = {
+    "daily": null,
+    "blitz": null,
+    "puzzles": null
+  }
+  
+  // Defines an array that we use to validate gameType later on
+  let scoreKeys = Object.keys(currentScores);
+  
+  // Loops through regex matches and maps them to gameTypes and scores.
+  for (i = 0; i < matches.length; i++) {
+    
+    let items = matches[i].split("\n");
+    let gameType = items[0].toLowerCase();
+    let gameTypeScore = items[2];
+    
+    if (scoreKeys.includes(gameType)) {
+      currentScores[gameType] = parseInt(gameTypeScore);
+    }
+  }
+  return currentScores;
+}
+
 /* 
+
+Note: This is the more direct route to get dat for Daily and Blitz game score.
+However, it does not provide score information for Puzzle ratings.
+As a result, this functionality has been replaced with getChessDotComData()
 
 Gets the current Daily and Blitz scores from chess.com
 
 @return {object} currentScores - Object containing the current scores for Daily and Blitz games
 
-*/
+
 
 function getCurrentChessScoresFromDotCom() {
   
@@ -75,6 +126,8 @@ function getCurrentChessScoresFromDotCom() {
   
   return currentScores
 }
+*/
+
 
 
 /* 
@@ -102,10 +155,12 @@ function getRecentChessScoresFromSheet(gameTypes) {
   // Get most recently added scores by game type
   var recentDaily = getLastScore(data, gameTypes["daily"]);
   var recentBlitz = getLastScore(data, gameTypes["blitz"]);
+  var recentPuzzles = getLastScore(data, gameTypes["puzzles"]);
   
   var recentScores = {
     "daily": recentDaily,
-    "blitz": recentBlitz
+    "blitz": recentBlitz,
+    "puzzles": recentPuzzles
   };
   
   return recentScores
