@@ -21,20 +21,31 @@ function findEmailsByLabel() {
   
   for (var i = 0; i < threads.length; i++) {
     
-    // Get the first message in the thread. Grammarly only sends one message per thread
-    var message = threads[i].getMessages()[0].getPlainBody(); 
     
-    // Since there aere multiple stats in the email, this gets the accuracy stat
-    var regexAccuracy = /accurate\sthan\s+\d+/g;
-    var regexScore = /\d+/g;
+    try {
+      // Get the first message in the thread. Grammarly only sends one message per thread
+      var message = threads[i].getMessages()[0].getPlainBody(); 
+      
+      // Since there are multiple stats in the email, this gets the accuracy stat
+      var regexAccuracy = /accurate\sthan\s+\d+/g;
+      var regexScore = /\d+/g;
+      // TODO: solve for "No activity to report! You were 100% accurate last week."
+      
+      var phrase = message.match(regexAccuracy)[0];
+      var score = phrase.match(regexScore)[0];
+      
+      // Submit the form via Google Forms
+      submitForm(multipleChoiceText, score);
+      
+      // Remove the label from the email thread.
+      threads[i].removeLabel(label); 
+      
+    } catch (e) {
+      // If there is an error, log it
+      // Basically, trying to solve for this error: TypeError: Cannot read property '0' of null
+      
+      Logger.log("An error occured: " + e);
+    };
     
-    var phrase = message.match(regexAccuracy)[0];
-    var score = phrase.match(regexScore)[0];
-    
-    // Submit the form via Google Forms
-    submitForm(multipleChoiceText, score);
-    
-    // Remove the label from the email thread.
-    threads[i].removeLabel(label); 
   }
 }
