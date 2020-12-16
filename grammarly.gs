@@ -27,9 +27,18 @@ function findEmailsByLabel() {
       var message = threads[i].getMessages()[0].getPlainBody(); 
       
       // Since there are multiple stats in the email, this gets the accuracy stat
-      var regexAccuracy = /accurate\sthan\s+\d+/g;
+      
+      /* Sovles for...
+        MASTERY
+
+        You were more accurate than
+        40% of Grammarly users.
+        
+        No activity to report! You were 100% accurate last week.
+      */
+      
+      var regexAccuracy = /MASTERY\s[A-Za-z\s!]+([\d]{2,3})%/g;
       var regexScore = /\d+/g;
-      // TODO: solve for "No activity to report! You were 100% accurate last week."
       
       var phrase = message.match(regexAccuracy)[0];
       var score = phrase.match(regexScore)[0];
