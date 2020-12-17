@@ -13,48 +13,78 @@ function findEmailsByLabel() {
   
   // Multiple choice response on the Google Form
   var multipleChoiceText = "2.c) 90% accuracy on Grammarly.";
+  var label = "Grammarly";
   
-  // Setup to get all the Threads that have a specific Label
-  var labelName = "Grammarly";
-  var label = GmailApp.getUserLabelByName(labelName);
-  var threads = label.getThreads(); // Gets all threads that contain the Label.
+  var threads = getEmailThreadsWithLabel(label);
   
   for (var i = 0; i < threads.length; i++) {
-    
-    
     try {
       // Get the first message in the thread. Grammarly only sends one message per thread
-      var message = threads[i].getMessages()[0].getPlainBody(); 
+      var message = threads[i].getMessages()[0].getPlainBody();
+      var score = getMasteryScore(message);
       
-      // Since there are multiple stats in the email, this gets the accuracy stat
+      if (score) {
+        submitForm(multipleChoiceText, score);
+      }
       
-      /* Sovles for...
-        MASTERY
-
-        You were more accurate than
-        40% of Grammarly users.
-        
-        No activity to report! You were 100% accurate last week.
-      */
+      threads[i].removeLabel(label); // Remove the label from the email thread. Results in 0 emaisl with label.
       
-      var regexAccuracy = /MASTERY\s[A-Za-z\s!]+([\d]{2,3})%/g;
-      var regexScore = /\d+/g;
-      
-      var phrase = message.match(regexAccuracy)[0];
-      var score = phrase.match(regexScore)[0];
-      
-      // Submit the form via Google Forms
-      submitForm(multipleChoiceText, score);
-      
-      // Remove the label from the email thread.
-      threads[i].removeLabel(label); 
-      
-    } catch (e) {
-      // If there is an error, log it
-      // Basically, trying to solve for this error: TypeError: Cannot read property '0' of null
-      
-      Logger.log("An error occured: " + e);
+    } catch (error) {
+      Logger.log("An error occured: " + error);
     };
     
   }
+}
+
+
+/*
+
+Gets the mastery score from email body content.
+
+@param {string} The plaintext body content of an email.
+@return {string} The Mastery score within the email.
+
+*/
+
+function getMasteryScore(emailBodyContent) {
+  
+  var masteryPhraseRegex = /Mastery\s+[A-Za-z\s!]+[\d]{2,3}%/g;
+  var masteryScoreRegex = /\d+/g;
+  var masteryScore;
+  
+  try {
+    var masteryPhrase = emailBodyContent.match(masteryPhraseRegex);
+  
+    if (masteryPhrase) {
+      masteryScore = masteryPhrase[0].match(masteryScoreRegex);
+      if (masteryScore) {
+        Logger.log("Mastery score found: " + masteryScore);
+      } else {
+        Logger.log("No mastery score found");
+      }
+    };
+  } catch (error) {
+    Logger.log("An error occured: " + error);
+  };
+  
+  return masteryScore;
+}
+
+
+/*
+
+Gets all Gmail message threads that are tagged with a specific label.
+
+@param {string} label - The string of the label to search for.
+@return {array} threads - An array of emails threads that contain messages.
+
+*/
+
+function getEmailThreadsWithLabel(label) {
+  
+  var label = GmailApp.getUserLabelByName(label);
+  var threads = label.getThreads(); // Gets all threads that contain the Label.
+  
+  return threads;
+  
 }

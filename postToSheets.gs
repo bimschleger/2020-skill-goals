@@ -27,4 +27,5 @@ function submitForm(multipleChoiceText, score) {
   
   // Submit the Form
   formResponse.submit();
+  Logger.log("Submitted the form: " + multipleChoiceText +", Score: " + score);
 }
