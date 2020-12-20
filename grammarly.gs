@@ -14,27 +14,28 @@ function findEmailsByLabel() {
   // Multiple choice response on the Google Form
   var multipleChoiceText = "2.c) 90% accuracy on Grammarly.";
   var label = "Grammarly";
+  var threads = getEmailThreadsWithLabel(label)
   
-  var threads = getEmailThreadsWithLabel(label);
+  if (threads) {
   
-  for (var i = 0; i < threads.length; i++) {
-    try {
-      // Get the first message in the thread. Grammarly only sends one message per thread
-      var message = threads[i].getMessages()[0].getPlainBody();
-      var score = getMasteryScore(message);
-      
-      if (score) {
-        submitForm(multipleChoiceText, score);
-      }
-      
-      threads[i].removeLabel(label); // Remove the label from the email thread. Results in 0 emaisl with label.
-      
-    } catch (error) {
-      Logger.log("An error occured: " + error);
+    for (var i = 0; i < threads.length; i++) {
+      try {
+        // Get the first message in the thread. Grammarly only sends one message per thread
+        var message = threads[i].getMessages()[0].getPlainBody();
+        var score = getMasteryScore(message);
+        
+        if (score) {
+          submitForm(multipleChoiceText, score);
+        }
+        
+        threads[i].removeLabel(label); // Remove the label from the email thread. Results in 0 emaisl with label.
+        
+      } catch (error) {
+        Logger.log("An error occured: " + error);
+      };
     };
-    
-  }
-}
+  };
+};
 
 
 /*
@@ -60,7 +61,7 @@ function getMasteryScore(emailBodyContent) {
       if (masteryScore) {
         Logger.log("Mastery score found: " + masteryScore);
       } else {
-        Logger.log("No mastery score found");
+        Logger.log("No Mastery score found");
       }
     };
   } catch (error) {
@@ -84,6 +85,15 @@ function getEmailThreadsWithLabel(label) {
   
   var label = GmailApp.getUserLabelByName(label);
   var threads = label.getThreads(); // Gets all threads that contain the Label.
+
+  try {
+    var numThreads;
+    numThreads = threads.length;
+  } catch (error) {
+    var numThreads = 0;
+  } finally {
+    Logger.log("Threads found for the label '" + label + "': " + numThreads);
+  };
   
   return threads;
   
