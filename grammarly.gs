@@ -13,7 +13,9 @@ function findEmailsByLabel() {
   
   // Multiple choice response on the Google Form
   var multipleChoiceText = "2.c) 90% accuracy on Grammarly.";
-  var label = "Grammarly";
+  var labelName = "Grammarly";
+  
+  var label = GmailApp.getUserLabelByName(labelName);
   var threads = getEmailThreadsWithLabel(label)
   
   if (threads) {
@@ -29,6 +31,7 @@ function findEmailsByLabel() {
         }
         
         threads[i].removeLabel(label); // Remove the label from the email thread. Results in 0 emaisl with label.
+        Logger.log("Removed the label '" + labelName + "' from the thread.");
         
       } catch (error) {
         Logger.log("An error occured: " + error);
@@ -83,7 +86,6 @@ Gets all Gmail message threads that are tagged with a specific label.
 
 function getEmailThreadsWithLabel(label) {
   
-  var label = GmailApp.getUserLabelByName(label);
   var threads = label.getThreads(); // Gets all threads that contain the Label.
 
   try {
